@@ -262,5 +262,3 @@ test_new_functions.c
 
 # Backup files
 *.bak
-
-.github/
