@@ -622,20 +622,14 @@ DF_IMPL df_frac df_from_ints(int64_t numerator, int64_t denominator) {
 
 // Create fraction from di_int values
 DF_IMPL df_frac df_from_di(di_int numerator, di_int denominator) {
+    DF_ASSERT(numerator && "df_from_di: numerator cannot be NULL");
     DF_ASSERT(denominator && !di_is_zero(denominator) && "df_from_di: denominator cannot be zero");
 
     df_frac f = df_alloc();
     DF_ASSERT(f && "df_from_ints: allocation failed");
 
-    f->numerator = di_copy(numerator);
-    f->denominator = di_copy(denominator);
-
-    if (!f->numerator || !f->denominator) {
-        di_release(&f->numerator);
-        di_release(&f->denominator);
-        DF_FREE(f);
-        return NULL;
-    }
+    f->numerator = di_retain(numerator);
+    f->denominator = di_retain(denominator);
 
     df_normalize_sign(f);
     df_reduce(f);
@@ -683,7 +677,12 @@ DF_IMPL df_frac df_from_double(double value, int64_t max_denominator) {
 // Copy a fraction
 DF_IMPL df_frac df_copy(df_frac f) {
     DF_ASSERT(f && "df_copy: fraction cannot be NULL");
-    return df_from_di(f->numerator, f->denominator);
+    di_int num = di_retain(f->numerator);
+    di_int den = di_retain(f->denominator);
+    df_frac result = df_from_di(num, den);
+    di_release(&num);
+    di_release(&den);
+    return result;
 }
 
 // Retain (increase reference count)
@@ -790,8 +789,10 @@ DF_IMPL df_frac df_negate(df_frac f) {
     DF_ASSERT(f && "df_negate: operand cannot be NULL");
 
     di_int neg_num = di_negate(f->numerator);
-    df_frac result = df_from_di(neg_num, f->denominator);
+    di_int den = di_retain(f->denominator);
+    df_frac result = df_from_di(neg_num, den);
     di_release(&neg_num);
+    di_release(&den);
 
     return result;
 }
@@ -801,8 +802,10 @@ DF_IMPL df_frac df_abs(df_frac f) {
     DF_ASSERT(f && "df_abs: operand cannot be NULL");
 
     di_int abs_num = di_abs(f->numerator);
-    df_frac result = df_from_di(abs_num, f->denominator);
+    di_int den = di_retain(f->denominator);
+    df_frac result = df_from_di(abs_num, den);
     di_release(&abs_num);
+    di_release(&den);
 
     return result;
 }
@@ -812,7 +815,12 @@ DF_IMPL df_frac df_reciprocal(df_frac f) {
     DF_ASSERT(f && "df_reciprocal: operand cannot be NULL");
     DF_ASSERT(!df_is_zero(f) && "df_reciprocal: reciprocal of zero");
 
-    return df_from_di(f->denominator, f->numerator);
+    di_int num = di_retain(f->denominator);
+    di_int den = di_retain(f->numerator);
+    df_frac result = df_from_di(num, den);
+    di_release(&num);
+    di_release(&den);
+    return result;
 }
 
 // Compare two fractions
@@ -991,13 +999,13 @@ DF_IMPL df_frac df_from_string(const char* str) {
 // Get numerator
 DF_IMPL di_int df_numerator(df_frac f) {
     DF_ASSERT(f && "df_numerator: operand cannot be NULL");
-    return di_copy(f->numerator);
+    return di_retain(f->numerator);
 }
 
 // Get denominator
 DF_IMPL di_int df_denominator(df_frac f) {
     DF_ASSERT(f && "df_denominator: operand cannot be NULL");
-    return di_copy(f->denominator);
+    return di_retain(f->denominator);
 }
 
 // Create zero
@@ -1077,8 +1085,10 @@ DF_IMPL df_frac df_floor(df_frac f) {
     // di_div already performs floor division (rounds toward negative infinity)
     di_int quotient = di_div(f->numerator, f->denominator);
 
-    df_frac result = df_from_di(quotient, di_one());
+    di_int one = di_one();
+    df_frac result = df_from_di(quotient, one);
     di_release(&quotient);
+    di_release(&one);
     return result;
 }
 
@@ -1097,10 +1107,10 @@ DF_IMPL df_frac df_ceil(df_frac f) {
     di_int one = di_one();
     di_int adjusted = di_add(quotient, one);
     di_release(&quotient);
-    di_release(&one);
 
-    df_frac result = df_from_di(adjusted, di_one());
+    df_frac result = df_from_di(adjusted, one);
     di_release(&adjusted);
+    di_release(&one);
     return result;
 }
 
@@ -1114,8 +1124,10 @@ DF_IMPL df_frac df_trunc(df_frac f) {
 
     // Truncate toward zero - same as whole_part
     di_int whole_int = df_whole_part(f);
-    df_frac result = df_from_di(whole_int, di_one());
+    di_int one = di_one();
+    df_frac result = df_from_di(whole_int, one);
     di_release(&whole_int);
+    di_release(&one);
     return result;
 }
 
@@ -1134,7 +1146,11 @@ DF_IMPL df_frac df_round(df_frac f) {
     // Check if fractional part is exactly 0.5
     if (df_eq(abs_frac_part, half)) {
         // Tie case - round to even
-        df_frac whole_frac = df_from_di(df_whole_part(f), di_one());
+        di_int whole_part = df_whole_part(f);
+        di_int one_den = di_one();
+        df_frac whole_frac = df_from_di(whole_part, one_den);
+        di_release(&whole_part);
+        di_release(&one_den);
 
         // Check if whole part is even
         di_int whole = df_whole_part(f);
@@ -1158,7 +1174,9 @@ DF_IMPL df_frac df_round(df_frac f) {
                 adjusted_whole = di_add(whole, one);
             }
 
-            df_frac result = df_from_di(adjusted_whole, di_one());
+            di_int one_den = di_one();
+            df_frac result = df_from_di(adjusted_whole, one_den);
+            di_release(&one_den);
 
             df_release(&half);
             df_release(&abs_frac_part);
@@ -1304,8 +1322,10 @@ DF_IMPL df_frac df_fractional_part(df_frac f) {
     // fractional_part = f - whole_part(f)
     // This preserves the sign: -2.333... - (-2) = -0.333...
     di_int whole_int = df_whole_part(f);
-    df_frac whole = df_from_di(whole_int, di_one());
+    di_int one = di_one();
+    df_frac whole = df_from_di(whole_int, one);
     di_release(&whole_int);
+    di_release(&one);
 
     df_frac result = df_sub(f, whole);
     df_release(&whole);
