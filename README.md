@@ -10,14 +10,14 @@ A single-header C library implementing arbitrary precision rational numbers (fra
 
 ## Features
 
-- ✅ **Single Header**: Easy integration - just include `dynamic_fraction.h`
-- ✅ **Arbitrary Precision**: Handle fractions with arbitrarily large numerators and denominators
-- ✅ **Reference Counting**: Automatic memory management with copy-on-write semantics
-- ✅ **Always Reduced**: Fractions are automatically kept in lowest terms
-- ✅ **Comprehensive API**: Full set of arithmetic, comparison, and conversion functions
-- ✅ **Built on dynamic_int.h**: Leverages proven arbitrary precision integer library
-- ✅ **Fail-Fast Error Handling**: Assertions on invalid inputs and allocation failures for immediate bug detection
-- ✅ **Mathematical Correctness**: Proper sign normalization and fraction reduction
+- **Single Header**: Easy integration - just include `dynamic_fraction.h`
+- **Arbitrary Precision**: Handle fractions with arbitrarily large numerators and denominators
+- **Reference Counting**: Automatic memory management with copy-on-write semantics
+- **Always Reduced**: Fractions are automatically kept in lowest terms
+- **Comprehensive API**: Full set of arithmetic, comparison, and conversion functions
+- **Built on dynamic_int.h**: Leverages proven arbitrary precision integer library
+- **Fail-Fast Error Handling**: Assertions on invalid inputs and allocation failures for immediate bug detection
+- **Mathematical Correctness**: Proper sign normalization and fraction reduction
 
 ## Quick Start
 
@@ -161,14 +161,14 @@ This library supports:
 ## Version History
 
 ### v1.0.0 (September 2025)
-- ✅ **Complete rational arithmetic**: Full arbitrary precision fraction operations
-- ✅ **Comprehensive test suite**: 26 unit tests covering all functions with 0 failures
-- ✅ **Advanced mathematical functions**: Floor, ceil, truncate, round, power operations
-- ✅ **String conversion**: Full parsing and generation of fraction strings
-- ✅ **Reference counting**: Robust automatic memory management
-- ✅ **Documentation**: Complete Doxygen API documentation with examples
-- ✅ **Dual licensing**: MIT OR Unlicense for maximum compatibility
-- ✅ **GitHub Actions**: Automated documentation generation and deployment
+- **Complete rational arithmetic**: Full arbitrary precision fraction operations
+- **Comprehensive test suite**: 26 unit tests covering all functions with 0 failures
+- **Advanced mathematical functions**: Floor, ceil, truncate, round, power operations
+- **String conversion**: Full parsing and generation of fraction strings
+- **Reference counting**: Robust automatic memory management
+- **Documentation**: Complete Doxygen API documentation with examples
+- **Dual licensing**: MIT OR Unlicense for maximum compatibility
+- **GitHub Actions**: Automated documentation generation and deployment
 
 ## Contributing
 
